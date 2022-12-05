@@ -12,7 +12,7 @@ it amounts to the 'independent' model in Murphy.
 
 import numpy as np
 from scipy import linalg
-from scipy import misc
+from scipy import misc,special
 
 from probability_model import ProbabilityModel
 from BVAR_NIG import BVARNIG
@@ -252,7 +252,7 @@ class BARNIG(ProbabilityModel):
                     self.joint_log_probabilities[kept_run_lengths])
         self.retained_run_lengths = (
                     self.retained_run_lengths[kept_run_lengths])
-        self.model_log_evidence = misc.logsumexp(
+        self.model_log_evidence = special.logsumexp(
                         self.joint_log_probabilities )
         
         """Trim all quantities for the location-specific models"""

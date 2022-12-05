@@ -18,7 +18,7 @@ import matplotlib.dates as mdates
 from matplotlib.dates import drange
 from matplotlib.colors import LogNorm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from scipy import misc
+from scipy import misc,special
 import numpy as np
 import pickle
 import os
@@ -1216,7 +1216,7 @@ class EvaluationTool:
         for (t,i) in zip(range(start + offset, stop), range(0, np.size(time_range))): #m_rl_distr[time_range]:
             for m in range(0,M):
                 if m<m_rl_distr[t-offset][:,:].shape[0]:
-                    model_posterior[m,i] = misc.logsumexp(
+                    model_posterior[m,i] = special.logsumexp(
                             m_rl_distr[t-offset][m,:])
         if not log_format:
             model_posterior = np.exp(model_posterior)
@@ -2291,7 +2291,7 @@ class EvaluationTool:
 #    L = np.size(non_inf_rld)
 #    myA = -np.inf * np.ones(L)
 #    for i in range(0, L):
-#        myA[i] = misc.logsumexp(non_inf_rld[:(i+1)])
+#        myA[i] = special.logsumexp(non_inf_rld[:(i+1)])
 #    plt.plot(np.linspace(1,L,L), myA)
 #
 #    

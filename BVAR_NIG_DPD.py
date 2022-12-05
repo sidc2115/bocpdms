@@ -11,7 +11,7 @@ Description: Implements the VB-approximation of the Density Power Divergence
 
 
 import numpy as np
-from scipy import special
+from scipy import special,misc
 from scipy import linalg
 from scipy import stats
 import scipy
@@ -2142,7 +2142,7 @@ class BVARNIGDPD(BVARNIG):
             P(r_t|y_1:t, m_t) = P(r_t,y_1:t,m_t)\P(y_1:t, m_t), where we get
             P(y_1:t, m_t) = P(y_1:t|m_t)P(m_t) by summing the joint probs"""
             self.model_log_evidence_p_eps = (
-                scipy.misc.logsumexp(joint_log_probs))
+                scipy.special.logsumexp(joint_log_probs))
             
             """STEP 2.3: Get the posterior expectation for alpha + eps, i.e.
             E[y_t+1|y_1:t, m_t, alpha_t + eps]. On the detector level, we 
@@ -2179,7 +2179,7 @@ class BVARNIGDPD(BVARNIG):
             
             """STEP 3.2: as before"""
             self.model_log_evidence_m_eps = (
-                    scipy.misc.logsumexp(joint_log_probs))
+                    scipy.special.logsumexp(joint_log_probs))
             
             """STEP 3.3: Get the posterior expectation for alpha + eps"""
             self.post_mean_m_eps = np.sum(
@@ -2319,7 +2319,7 @@ class BVARNIGDPD(BVARNIG):
 
         self.retained_run_lengths = (
                     self.retained_run_lengths[kept_run_lengths])
-        self.model_log_evidence = scipy.misc.logsumexp(
+        self.model_log_evidence = scipy.special.logsumexp(
                         self.joint_log_probabilities )
         
         
@@ -2459,7 +2459,7 @@ class BVARNIGDPD(BVARNIG):
                     ))
             else:
                 sign = np.sign(E3)*np.sign(K)
-                sum_, sign_ = scipy.misc.logsumexp(
+                sum_, sign_ = scipy.special.logsumexp(
                         a = np.log(np.abs(E3)) + (an + 0.5*d*alpha)*(np.log(bn) - 
                                    np.log(np.abs(K))),
                         b = sign,
@@ -2814,7 +2814,7 @@ class BVARNIGDPD(BVARNIG):
                 else:  
                     signs = np.sign(E3) * np.sign(K)
                     sum_1_log, sign =   ( #E2der_m_ba * (
-                        scipy.misc.logsumexp(
+                        scipy.special.logsumexp(
                             a = (
                                 np.log(np.abs(E3)) 
                                 #(self.a_rt[r] + 0.5*self.num_regressors*alpha)*
@@ -2839,7 +2839,7 @@ class BVARNIGDPD(BVARNIG):
                     
                     if np.size(Klarger0)>0:
                         sign_ = np.sign(np.log(K[Klarger0]))*np.sign(E3[Klarger0])
-                        exact_der_part_log, sign_edpl = scipy.misc.logsumexp(
+                        exact_der_part_log, sign_edpl = scipy.special.logsumexp(
                                 a = ( np.log(np.abs(E3[Klarger0])) 
                                       + (an + 0.5*d*alpha)*
                                          (np.log(bn) - np.log(K[Klarger0]))
@@ -2860,7 +2860,7 @@ class BVARNIGDPD(BVARNIG):
                             (bn/K)^([an - eps] + 0.5d*alpha )."""
                     if np.size(Ksmaller0):
                         eps = pow(10,-5)
-                        diff_log, diff_log_sign = scipy.misc.logsumexp(
+                        diff_log, diff_log_sign = scipy.special.logsumexp(
                                 a = np.array([
                                         (an + eps + 0.5*d*alpha) * (
                                             np.log(bn) - np.log(np.abs(K[Ksmaller0]))), 
@@ -2877,7 +2877,7 @@ class BVARNIGDPD(BVARNIG):
                         """Using the above, get the sum of the numerical gradient
                         parts for which K was smaller than 0."""
                         sig = diff_log_sign * np.sign(E3[Ksmaller0])
-                        numerical_der_part_log, sign_ndpl = scipy.misc.logsumexp(
+                        numerical_der_part_log, sign_ndpl = scipy.special.logsumexp(
                                 a = (np.log(np.abs(E3[Ksmaller0])) + diff_log + 
                                      -np.log((2*eps))),
                                 b = sig,
@@ -2890,7 +2890,7 @@ class BVARNIGDPD(BVARNIG):
                             
                     """Finally, get the full sum of derivatives for both the K>0 
                     and K<0 terms"""
-                    sum_part, sum_sgn = scipy.misc.logsumexp(
+                    sum_part, sum_sgn = scipy.special.logsumexp(
                             a = np.array([exact_der_part_log,
                                          numerical_der_part_log]),
                             b = np.array([sign_edpl, sign_ndpl]),
@@ -3076,7 +3076,7 @@ class BVARNIGDPD(BVARNIG):
                 else:            
                             
                     sig = (np.sign(E3) * np.sign(K) )#np.maximum(K, pow(10,-5)))))
-                    sum_1_log, sign_ = scipy.misc.logsumexp(
+                    sum_1_log, sign_ = scipy.special.logsumexp(
                             a = (
                                 np.log(np.abs(E3))
                                 + (np.log(bn) - np.log(np.abs(K)))#np.maximum(K, pow(10,-5))))) 
@@ -3095,7 +3095,7 @@ class BVARNIGDPD(BVARNIG):
                 
                 #RUNTIME OVERFLOW due to E2 and self.K [b^a]   
                     sign = np.sign(E3) * np.sign(K)
-                    sum_2_log, sign_ = scipy.misc.logsumexp(
+                    sum_2_log, sign_ = scipy.special.logsumexp(
                             a = (np.log(np.abs(E3)) + (an + 0.5*alpha+1)*(
                                     np.log(bn) - np.log(np.abs(K)))),
                             b = sign,
@@ -3242,7 +3242,7 @@ class BVARNIGDPD(BVARNIG):
                     #DEBUG: Somehow, an error occurs here 'divide by zero in log'
                     #       which means we get log(0) somewhere. Internally that is
                     #       solved by assigning -np.inf, so there is no issue here
-                    sum_1_log, sign_ = scipy.misc.logsumexp(
+                    sum_1_log, sign_ = scipy.special.logsumexp(
                             a = (np.log(np.abs(E3))[:,np.newaxis] 
                                  + np.log(np.abs(E4der + E5der +E7der))
                                  + (an + 0.5*alpha+1)*(
@@ -3413,7 +3413,7 @@ class BVARNIGDPD(BVARNIG):
                 """STEP 3: Log-transformed summation"""
                 sum_1_signs = np.sign(E3der) * np.sign(K)[:,np.newaxis]
                 #needs to be multiplied by E2_m_ba later
-                sum_1, sum_1_sign = scipy.misc.logsumexp(
+                sum_1, sum_1_sign = scipy.special.logsumexp(
                         a = (np.log(np.abs(E3der))  
                             + (np.log(bn) - np.log(np.abs(K)))[:,np.newaxis]*(an + 0.5*d*alpha)
                             - np.log(bn) * (0.5*d*alpha)),
@@ -3424,7 +3424,7 @@ class BVARNIGDPD(BVARNIG):
                         
                 sum_2_signs = np.sign(E4to7der) * np.sign(K)[:,np.newaxis] * (-1)
                 #needs to be multiplied by E2_m_ba later
-                sum_2, sum_2_sign = scipy.misc.logsumexp(
+                sum_2, sum_2_sign = scipy.special.logsumexp(
                         a = (np.log(E3)[:,np.newaxis]
                             + np.log(0.5)
                             + np.log(np.abs(E4to7der)) 
@@ -3439,7 +3439,7 @@ class BVARNIGDPD(BVARNIG):
                 
                 sum_3_signs = np.sign(K)
                 #needs to be multiplied by E2der_m_ba later
-                sum_3, sum_3_sign = scipy.misc.logsumexp(
+                sum_3, sum_3_sign = scipy.special.logsumexp(
                         a = (np.log(E3)
                             + (np.log(bn) - np.log(np.abs(K))) * (an + 0.5 * d * alpha)
                             - np.log(bn) * (0.5 * d * alpha)),
@@ -3448,7 +3448,7 @@ class BVARNIGDPD(BVARNIG):
                         axis=0
                     )
                 
-                sum_sum, sum_sum_sign = scipy.misc.logsumexp(
+                sum_sum, sum_sum_sign = scipy.special.logsumexp(
                         a=np.array([sum_1, sum_2]),
                         b=np.array([sum_1_sign, sum_2_sign]),
                         return_sign = True,
@@ -3820,7 +3820,7 @@ class BVARNIGDPD(BVARNIG):
 #    
 #            signs = np.sign(self.E3) * np.sign(self.K)
 #            sum_1_log, sign =   ( #E2der_m_ba * (
-#                scipy.misc.logsumexp(
+#                scipy.special.logsumexp(
 #                    a = (
 #                        np.log(np.abs(self.E3)) +
 #                        #(self.a_rt[r] + 0.5*self.num_regressors*alpha)*
@@ -3852,7 +3852,7 @@ class BVARNIGDPD(BVARNIG):
 #            
 #            signs_ = np.sign(self.E3) * np.sign(self.K) * np.sign(np.log(self.K))
 #            sum_2_log, sign_ = (
-#                    scipy.misc.logsumexp(
+#                    scipy.special.logsumexp(
 #                        a = (
 #                            np.log(np.abs(self.E3))  
 #                            + (np.log(self.b_rt[r]) - np.log(np.abs(self.K)))

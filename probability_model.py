@@ -60,7 +60,7 @@ class ProbabilityModel:
                     - log_scale_new)
             self.joint_log_probabilities[1:] = (
                     self.joint_log_probabilities[1:] + rescaler_for_old_obs)
-        self.model_log_evidence = scipy.misc.logsumexp(
+        self.model_log_evidence = scipy.special.logsumexp(
                 self.joint_log_probabilities)
     
     #SUPER CLASS IMPLEMENTATION
@@ -318,7 +318,7 @@ class ProbabilityModel:
         the hazard rate"""
         #DEBUG: We need to use chopping of run-lengths here, too
         #DEBUG: we need the prior predictive here!
-        #CP_log_prob = scipy.misc.logsumexp(helper_log_probabilities + 
+        #CP_log_prob = scipy.special.logsumexp(helper_log_probabilities + 
         #                                  np.log(cp_model.hazard_vector(1, t)))
         #self.joint_log_probabilities = (helper_log_probabilities +
         #    np.log(1-cp_model.hazard_vector(1, t)))
@@ -334,7 +334,7 @@ class ProbabilityModel:
         particular model in the model universe, which is the sum of CP and 
         growth probabilities"""
         model_log_evidence_tm1 = self.model_log_evidence
-        self.model_log_evidence = scipy.misc.logsumexp(
+        self.model_log_evidence = scipy.special.logsumexp(
                 self.joint_log_probabilities )
         
         
@@ -405,7 +405,7 @@ class ProbabilityModel:
             """Combine jlpd parts 1 and 2, store result in dP(r_t, y_1:t-1), 
             the gradient of the joint probabilities, as before the
             size is num_params x run_length_num"""
-            res_val, res_sign = scipy.misc.logsumexp(
+            res_val, res_sign = scipy.special.logsumexp(
                 a = np.array([jlpd_part1_val, jlpd_part2_val]),
                 b = np.array([jlpd_part1_sign, jlpd_part2_sign]),
                 return_sign=True,
@@ -420,7 +420,7 @@ class ProbabilityModel:
             Size is num_params x run_length_num
             """
             results_grad_1 = (
-                scipy.misc.logsumexp(
+                scipy.special.logsumexp(
                         a = np.array([
                              gradients_log_predictive_val[:,1:] + #[:,np.newaxis] +
                              np.log(cp_model.hazard_vector(1,t)) + 
@@ -434,7 +434,7 @@ class ProbabilityModel:
             CP_grad_1_val, CP_grad_1_sign = (results_grad_1[0].flatten(), 
                                              results_grad_1[1].flatten())
             results_grad_2 = (
-                scipy.misc.logsumexp(
+                scipy.special.logsumexp(
                     a = np.array([
                          self.model_specific_joint_log_probabilities_derivative +
                          np.log(cp_model.hazard_vector(1,t)) + 
@@ -449,7 +449,7 @@ class ProbabilityModel:
             CP_grad_2_val, CP_grad_2_sign = (results_grad_2[0].flatten(), 
                                              results_grad_2[1].flatten())
             
-            CP_grad_val, CP_grad_sign = scipy.misc.logsumexp(
+            CP_grad_val, CP_grad_sign = scipy.special.logsumexp(
                     a = np.array([CP_grad_1_val, CP_grad_2_val]),
                     b = np.array([CP_grad_1_sign, CP_grad_2_sign]),
                     return_sign = True,
@@ -468,13 +468,13 @@ class ProbabilityModel:
                 """STEP 6.1: Get sum of the model specific joint log prob
                 derivatives, i.e. sum_{r \in R(t)} d/dtheta P(r_t, y_1:t|m_t)"""
                 joint_log_der_sum, joint_log_der_sum_signs = (
-                    scipy.misc.logsumexp(
+                    scipy.special.logsumexp(
                     a=(self.model_specific_joint_log_probabilities_derivative),
                     b=self.model_specific_joint_log_probabilities_derivative_sign,
                     return_sign=True, axis=1))
                 """STEP 6.2: Get the two parts needed for computing the 
                 derivative of P(r_t|y_1:t, m_t) w.r.t. theta"""
-                log_evidence = scipy.misc.logsumexp(model_specific_joint_log_probs)
+                log_evidence = scipy.special.logsumexp(model_specific_joint_log_probs)
                 part1 = (self.model_specific_joint_log_probabilities_derivative
                          - log_evidence)
                 part2 = (joint_log_probabilities_tm1 - 2*log_evidence + 
@@ -483,7 +483,7 @@ class ProbabilityModel:
                 the desired quantity, d/dtheta P(r_t|y_1:t, m_t). Note that we
                 flip the sign of the second quantity, as it is subtracted"""
                 #DEBUG: need to stretch signs of joint log der sums !
-                rld_der_signs, rld_der = scipy.misc.logsumexp(
+                rld_der_signs, rld_der = scipy.special.logsumexp(
                     a = np.array([part1, part2]),
                     b = np.array([
                     self.model_specific_joint_log_probabilities_derivative_sign,
@@ -502,7 +502,7 @@ class ProbabilityModel:
 #                print("run_length_log_distro", run_length_log_distro.shape)
 #                print("rld_der", rld_der.shape)
 #                print("self.one_step_ahead_predictive_log_probs[:,np.newaxis]", self.one_step_ahead_predictive_log_probs[:,np.newaxis].shape)
-                gradient, gradient_signs = scipy.misc.logsumexp(
+                gradient, gradient_signs = scipy.special.logsumexp(
                     a = np.array([
                         gradients_log_predictive_val[:,1:] + 
                             run_length_log_distro[np.newaxis,:],
@@ -518,7 +518,7 @@ class ProbabilityModel:
                 P(Y_t|Y_1:t-1), since what we really want is 
                 d/dtheta{log(P(Y_t|Y_1:t-1))} = 
                     d/dtheta{P(Y_t|Y_1:t-1)}/P(Y_t|Y_1:t-1)"""
-                pred = scipy.misc.logsumexp(
+                pred = scipy.special.logsumexp(
                         self.one_step_ahead_predictive_log_probs + 
                         run_length_log_distro)
                 
@@ -548,7 +548,7 @@ class ProbabilityModel:
                 self.caron_hyperparameter_optimization(t, caron_gradient, 
                                                        step_size)
                 
-#                sign, caron_gradient = scipy.misc.logsumexp(
+#                sign, caron_gradient = scipy.special.logsumexp(
 #                    a=(self.model_specific_joint_log_probabilities_derivative),
 #                    b=self.model_specific_joint_log_probabilities_derivative_sign,
 #                    return_sign=True, axis=1)
@@ -580,7 +580,7 @@ class ProbabilityModel:
             d/dtheta P(r_t-1, y_1:t-1) needed for Caron's gradient descent"""
             
             """Compute P(y:1_t-1|m_t=m)"""
-            log_evidence = scipy.misc.logsumexp(model_specific_joint_log_probs)
+            log_evidence = scipy.special.logsumexp(model_specific_joint_log_probs)
             """Update derivatives"""
             self.model_specific_joint_log_probabilities_derivative = np.insert(
                     res_val, 0, CP_grad_val, axis=1)
@@ -644,7 +644,7 @@ class ProbabilityModel:
         probabilities w.r.t. alpha. 
         NOTE: These are the growth-probability updates!
         """
-        new_derivatives, new_derivatives_sign = scipy.misc.logsumexp(
+        new_derivatives, new_derivatives_sign = scipy.special.logsumexp(
                 a = np.array([
                     rest_1 + self.log_alpha_derivatives_joint_probabilities, 
                     rest_2 + one_step_ahead_log_loss_derivatives[1:],
@@ -663,7 +663,7 @@ class ProbabilityModel:
         CP_d_1 = (one_step_ahead_log_loss_derivatives[0] + np.log(model_prior) + 
                   log_CP_evidence)
         CP_d_2 = (self.r0_log_loss + np.log(model_prior) + log_CP_evidence_der)
-        CP_derivative, CP_derivative_sign = scipy.misc.logsumexp(
+        CP_derivative, CP_derivative_sign = scipy.special.logsumexp(
             a=np.array([CP_d_1, CP_d_2]),
             b = np.array([one_step_ahead_log_loss_derivatives_sign[0], 
                           log_CP_evidence_der_sign]),
@@ -780,7 +780,7 @@ class ProbabilityModel:
                             kept_run_lengths[index] = True
                             run_length_log_distr[index] = alpha
                             #DEBUG: log sum exp
-                            u = scipy.misc.logsumexp(
+                            u = scipy.special.logsumexp(
                                     np.array([u, alpha, -rl_particle]))                    
 
             

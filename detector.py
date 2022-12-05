@@ -719,7 +719,7 @@ class Detector:
         """STEP 1.4: we need to sum over the columns (i.e. the models).
         One needs log sum exp for this, since all is stored in log form.
         P(r_t|y_1:t) = \sum_m P(r_t,m_t|y_1:t)"""
-        run_length_log_distr = misc.logsumexp(
+        run_length_log_distr = special.logsumexp(
                 model_rl_log_distributions, axis=0)
         
         """STEP 2: Store to object, and if all run lengths are to be stored,
@@ -904,7 +904,7 @@ class Detector:
                 computation is then done when we update the probs."""
                 #DEBUG: Where does the evidence come from?
                 #DEBUG: Unclear what we compute here and inside probability_model!
-                _1, _2 = misc.logsumexp(
+                _1, _2 = special.logsumexp(
                         a = np.log(self.cp_model.hazard_vector(1, t)) + 
                             all_log_alpha_derivatives, # + 
                             #self.log_evidence,
@@ -1033,7 +1033,7 @@ class Detector:
                     #print("model log evidences:", [m.model_log_evidence for m in self.model_universe])
                     #print("joint log probs", model.joint_log_probabilities)
                     #print("hazard", np.log(self.cp_model.hazard_vector(1, t)))
-                    log_CP_evidence = misc.logsumexp(
+                    log_CP_evidence = special.logsumexp(
                             np.log(self.cp_model.hazard_vector(1, t)) + 
                             self.model_and_run_length_log_distr + 
                             self.log_evidence)
@@ -1519,7 +1519,7 @@ class Detector:
              #self.model_universe[m].retained_run_lengths])
              #np.where(self.model_and_run_length_log_distr[m,:]> -np.inf)])            
              for m in range(0, self.Q)]
-        summed_up = -misc.logsumexp([item for entry in 
+        summed_up = -special.logsumexp([item for entry in 
             all_one_step_ahead_lklhoods_weighted for item in entry])
         self.negative_log_likelihood.append(summed_up)
         #logsumexp
@@ -1544,7 +1544,7 @@ class Detector:
              #self.model_universe[m].retained_run_lengths])
              #np.where(self.model_and_run_length_log_distr[m,:]> -np.inf)])            
              
-        summed_up = -misc.logsumexp([item for entry in 
+        summed_up = -special.logsumexp([item for entry in 
             all_one_step_ahead_lklhoods_weighted for item in entry])
         self.negative_log_likelihood_fixed_pars.append(summed_up)
 
@@ -1731,7 +1731,7 @@ class Detector:
             if model.auto_prior_update == True:
                 """We need to weigh quantities acc. to rld"""
                 model_specific_rld = (self.model_and_run_length_log_distr[m,:] -
-                    misc.logsumexp(self.model_and_run_length_log_distr[m,:]))
+                    special.logsumexp(self.model_and_run_length_log_distr[m,:]))
                 model.prior_update(t, model_specific_rld)    
         
     def MAP_estimate(self, t):
