@@ -13,7 +13,7 @@ and a model prior probability over each of the models in the collection.
 
 import numpy as np
 import scipy
-from scipy import misc
+from scipy import misc,specia
 import time
 
 from BVAR_NIG_DPD import BVARNIGDPD
@@ -451,7 +451,7 @@ class Detector:
         if self.jlp_scale is None:
             log_scale_new = (np.max([model.joint_log_probabilities 
                         for model in self.model_universe]) - 1)
-#            log_scale_new = max(1.0, scipy.misc.logsumexp([
+#            log_scale_new = max(1.0, scipy.special.logsumexp([
 #                        model.joint_log_probabilities 
 #                        for model in self.model_universe]) - 1)
             rescaler_for_old_obs = None
@@ -462,15 +462,15 @@ class Detector:
             min_ = (np.min([model.joint_log_probabilities 
                         for model in self.model_universe]) - 1)
 #            mean_ = ((1.0/(self.Q + len(self.all_retained_run_lengths))) * 
-#                     scipy.misc.logsumexp([model.joint_log_probabilities 
+#                     scipy.special.logsumexp([model.joint_log_probabilities 
 #                        for model in self.model_universe]))
-#            log_scale_new = scipy.misc.logsumexp(
+#            log_scale_new = scipy.special.logsumexp(
 #                    [model.joint_log_probabilities 
 #                        for model in self.model_universe])
             log_scale_new = min_ #0.5 * max(max_-min_, 2) #min(log_scale_old, 
 #                    (np.max([model.joint_log_probabilities 
 #                        for model in self.model_universe]) - 1))
-#            log_scale_new = max(1.0, scipy.misc.logsumexp([model.joint_log_probabilities 
+#            log_scale_new = max(1.0, scipy.special.logsumexp([model.joint_log_probabilities 
 #                        for model in self.model_universe]))
             rescaler_for_old_obs =  log_scale_old - log_scale_new        
         
@@ -478,7 +478,7 @@ class Detector:
         
  #        only applied to most recent obs = np.log(scale_old/scale_new)
         self.jlp_scale = log_scale_new
-#        log_scale_new = scipy.misc.logsumexp([model.joint_log_probabilities 
+#        log_scale_new = scipy.special.logsumexp([model.joint_log_probabilities 
 #                        for model in self.model_universe])
          
 #        """STEP 2: Use this mean to rescale all of them"""
@@ -534,9 +534,9 @@ class Detector:
             """STEP 1A.2: compute the posterior means for alpha +/- eps"""
             
             """STEP 1A.2.1: Get the model posteriors for alpha +/- eps"""
-            total_evidence_p_eps = scipy.misc.logsumexp(
+            total_evidence_p_eps = scipy.special.logsumexp(
                     list_model_log_evidences_p_eps)
-            total_evidence_m_eps = scipy.misc.logsumexp(
+            total_evidence_m_eps = scipy.special.logsumexp(
                     list_model_log_evidences_m_eps)
             model_posteriors_p_eps = np.exp(
                 np.array(list_model_log_evidences_p_eps)
@@ -854,13 +854,13 @@ class Detector:
                 derivative of P(m_t|m_t-1, r_t-1, y_1:t-1), see (4) in 
                 handwritten notes. Dimension is Rx1"""
                 model_sums_derivatives, model_sums_derivatives_sign = (
-                    scipy.misc.logsumexp(
+                    scipy.special.logsumexp(
                         a = all_log_alpha_derivatives,
                         b = all_log_alpha_derivatives_sign,
                         return_sign = True,
                         axis=0
                     ))
-                model_sums = scipy.misc.logsumexp(
+                model_sums = scipy.special.logsumexp(
                         a = all_log_probs, 
                         axis = 0
                     )
@@ -880,7 +880,7 @@ class Detector:
 #                print("sign_1", sign_1.shape)
 #                print("sign_2", sign_2.shape)
                 
-                expr, sign = scipy.misc.logsumexp(
+                expr, sign = scipy.special.logsumexp(
                         a = np.array([expr_1, expr_2]),
                         b = np.array([sign_1, sign_2 * 
                                       np.ones(self.Q)[:,np.newaxis]]),
@@ -1229,7 +1229,7 @@ class Detector:
 
         #r0_log_prob
         """STEP 2: Sum over all the joint log probs' derivatives"""
-        sum_derivatives, sum_derivatives_sign = scipy.misc.logsumexp(
+        sum_derivatives, sum_derivatives_sign = scipy.special.logsumexp(
                 a = all_log_alpha_derivatives, 
                 b = all_log_alpha_derivatives_sign,
                 return_sign = True)
@@ -1244,7 +1244,7 @@ class Detector:
         term_2_sign = (-1) * sum_derivatives_sign * np.abs(term_1_sign)
         
         run_length_and_model_log_der, run_length_and_model_log_der_sign = (
-            scipy.misc.logsumexp(
+            scipy.special.logsumexp(
                 a = np.array([term_1, np.abs(term_1_sign) * term_2]),
                 b = np.array([term_1_sign, term_2_sign]), 
                 return_sign = True,
@@ -1320,17 +1320,17 @@ class Detector:
 #                print("mrl", self.model_and_run_length_log_distr[m][
 #                            model_indices_indicators_relative_to_all_run_lengths].shape)
 #                print("one steps", one_steps.shape)
-                sum_ = scipy.misc.logsumexp(
+                sum_ = scipy.special.logsumexp(
                     a = np.array([
                         self.model_and_run_length_log_distr[m][
                             model_indices_indicators_relative_to_all_run_lengths],
                         one_steps
                     ]))
-                post_prob_log = scipy.misc.logsumexp(
+                post_prob_log = scipy.special.logsumexp(
                         a = np.array([post_prob_log, sum_])
                         )
                 """rlm log derivative"""
-                sum_, sign_ = scipy.misc.logsumexp(
+                sum_, sign_ = scipy.special.logsumexp(
                     a = np.array([
                         run_length_and_model_log_der[m,
                             model_indices_indicators_relative_to_all_run_lengths],
@@ -1341,7 +1341,7 @@ class Detector:
                             model_indices_indicators_relative_to_all_run_lengths],
                         np.ones(num_rl)]),
                     return_sign = True)
-                post_prob_der_log, post_prob_der_log_sign = scipy.misc.logsumexp(
+                post_prob_der_log, post_prob_der_log_sign = scipy.special.logsumexp(
                     a = np.array([post_prob_der_log, sum_]),
                     b = np.array([post_prob_der_log_sign, sign_]),
                     return_sign = True)
@@ -1574,7 +1574,7 @@ class Detector:
     #IMPLEMENTED FOR ALL SUBCLASSES IF model_evidence UPDATED CORRECTLY IN SUBLCASS
     def update_log_evidence(self):
         """Sum up all the model-specific evidences from the submodels"""
-        self.log_evidence = scipy.misc.logsumexp([model.model_log_evidence
+        self.log_evidence = scipy.special.logsumexp([model.model_log_evidence
                                 for model in self.model_universe])
         
     
