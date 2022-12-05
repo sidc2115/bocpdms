@@ -13,7 +13,7 @@ and a model prior probability over each of the models in the collection.
 
 import numpy as np
 import scipy
-from scipy import misc,specia
+from scipy import misc,special
 import time
 
 from BVAR_NIG_DPD import BVARNIGDPD
